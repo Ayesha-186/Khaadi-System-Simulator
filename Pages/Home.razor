@@ -1,0 +1,139 @@
+﻿@page "/"
+@using System.Linq
+
+<div style="background-color: #1a1a1a; color: #d4af37; padding: 20px; font-family: 'Segoe UI', Arial; min-height: 100vh;">
+    <h1 style="border-bottom: 2px solid #d4af37; padding-bottom: 10px;">KHAADI SYSTEM SIMULATOR</h1>
+
+    <div style="display: flex; flex-wrap: wrap; gap: 20px; margin-bottom: 20px; background: #222; padding: 15px; border: 1px solid #444;">
+        <div>
+            <label style="margin-right: 10px; font-weight: bold;">LOCATION:</label>
+            <select @bind="selectedLocation" style="background: #000; color: #d4af37; border: 1px solid #d4af37; padding: 5px;">
+                <option value="Store">Khaadi Store</option>
+                <option value="Cafe">Khaadi Cafe</option>
+            </select>
+        </div>
+        <div>
+            <label style="margin-right: 10px; font-weight: bold;">MODEL:</label>
+            <select @bind="selectedModel" style="background: #000; color: #d4af37; border: 1px solid #d4af37; padding: 5px;">
+                <option value="MM1">M/M/1</option>
+                <option value="MG1">M/G/1</option>
+                <option value="GG1">G/G/1</option>
+            </select>
+        </div>
+        <div>
+            <label style="margin-right: 10px; font-weight: bold;">TIME UNIT:</label>
+            <select @bind="selectedUnit" style="background: #000; color: #d4af37; border: 1px solid #d4af37; padding: 5px;">
+                <option value="sec">Seconds (sec)</option>
+                <option value="min">Minutes (min)</option>
+                <option value="hr">Hours (hr)</option>
+            </select>
+        </div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-bottom: 20px;">
+        <div style="border: 1px solid #d4af37; padding: 15px; text-align: center;">
+            <p style="margin: 0; font-size: 0.75em;">NUMBER OF SERVERS</p>
+            <h2 style="margin: 5px 0;">1</h2>
+        </div>
+        <div style="border: 1px solid #d4af37; padding: 15px; text-align: center;">
+            <p style="margin: 0; font-size: 0.75em;">SERVER UTILIZATION</p>
+            <h2 style="margin: 5px 0;">@utilization.ToString("F1")%</h2>
+        </div>
+        <div style="border: 1px solid #d4af37; padding: 15px; text-align: center;">
+            <p style="margin: 0; font-size: 0.75em;">AVG QUEUE LENGTH</p>
+            <h2 style="margin: 5px 0;">@avgQueueLength.ToString("F2")</h2>
+        </div>
+        <div style="border: 1px solid #d4af37; padding: 15px; text-align: center;">
+            <p style="margin: 0; font-size: 0.75em;">AVG SYSTEM LENGTH</p>
+            <h2 style="margin: 5px 0;">@avgSystemLength.ToString("F2")</h2>
+        </div>
+        <div style="border: 1px solid #d4af37; padding: 15px; text-align: center;">
+            <p style="margin: 0; font-size: 0.75em;">AVG WAIT TIME</p>
+            <h2 style="margin: 5px 0;">@avgWaitTime.ToString("F2") @selectedUnit</h2>
+        </div>
+    </div>
+
+    <button @onclick="RunSimulation" style="background-color: #d4af37; color: black; border: none; padding: 12px 25px; cursor: pointer; font-weight: bold; margin-bottom: 20px;">
+        RUN SIMULATION
+    </button>
+
+    @if (customers.Any())
+    {
+        <table style="width: 100%; border-collapse: collapse; color: white; background-color: #222;">
+            <thead>
+                <tr style="background-color: #d4af37; color: black;">
+                    <th style="padding: 12px; border: 1px solid #444;">Customer</th>
+                    <th style="padding: 12px; border: 1px solid #444;">Arrival</th>
+                    <th style="padding: 12px; border: 1px solid #444;">Wait Time</th>
+                    <th style="padding: 12px; border: 1px solid #444;">Service Ends</th>
+                    <th style="padding: 12px; border: 1px solid #444;">System Time</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var c in customers)
+                {
+                    <tr>
+                        <td style="padding: 10px; border: 1px solid #444; text-align: center;">@c.Id</td>
+                        <td style="padding: 10px; border: 1px solid #444; text-align: center;">@c.ArrivalTime @selectedUnit</td>
+                        <td style="padding: 10px; border: 1px solid #444; text-align: center;">@c.WaitTime @selectedUnit</td>
+                        <td style="padding: 10px; border: 1px solid #444; text-align: center;">@c.ExitTime @selectedUnit</td>
+                        <td style="padding: 10px; border: 1px solid #444; text-align: center;">@(c.ExitTime - c.ArrivalTime) @selectedUnit</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</div>
+
+@code {
+    private List<CustomerInfo> customers = new();
+    private string selectedModel = "MM1";
+    private string selectedLocation = "Store";
+    private string selectedUnit = "min";
+    private double avgWaitTime, avgQueueLength, avgSystemLength, utilization;
+
+    public class CustomerInfo {
+        public int Id { get; set; }
+        public double ArrivalTime { get; set; }
+        public double WaitTime { get; set; }
+        public double ServiceTime { get; set; }
+        public double ExitTime { get; set; }
+    }
+
+    private void RunSimulation() {
+        customers.Clear();
+        Random rnd = new();
+        double currentTime = 0;
+        double nextAvailableTime = 0;
+        double totalServiceTime = 0;
+
+        int baseService = selectedLocation == "Cafe" ? 8 : 4;
+
+        for (int i = 1; i <= 15; i++) {
+            double arrivalGap = selectedModel == "GG1" ? 5 : rnd.Next(3, 10);
+            double serviceTime = (selectedModel == "MG1" || selectedModel == "GG1") ? baseService : rnd.Next(baseService - 2, baseService + 3);
+            
+            currentTime += arrivalGap;
+            totalServiceTime += serviceTime;
+            
+            double startService = Math.Max(currentTime, nextAvailableTime);
+            double wait = startService - currentTime;
+            double exit = startService + serviceTime;
+
+            customers.Add(new CustomerInfo { 
+                Id = i, 
+                ArrivalTime = currentTime, 
+                WaitTime = wait, 
+                ServiceTime = serviceTime,
+                ExitTime = exit 
+            });
+            nextAvailableTime = exit;
+        }
+
+        double totalTime = customers.Last().ExitTime;
+        avgWaitTime = customers.Average(c => c.WaitTime);
+        utilization = (totalServiceTime / totalTime) * 100; 
+        avgQueueLength = customers.Sum(c => c.WaitTime) / totalTime;
+        avgSystemLength = customers.Sum(c => (c.ExitTime - c.ArrivalTime)) / totalTime;
+    }
+}
