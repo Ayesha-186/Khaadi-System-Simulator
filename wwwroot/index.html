@@ -1,24 +1,20 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>KhaadiWeb</title>
+    <title>Khaadi System Simulator</title>
     <base href="/Khaadi-System-Simulator/" />
-    <link rel="stylesheet" href="css/bootstrap/bootstrap.min.css" />
-    <link rel="stylesheet" href="css/app.css" />
-    <link rel="icon" type="image/png" href="favicon.png" />
-    <link href="KhaadiWeb.styles.css" rel="stylesheet" />
+    <link rel="stylesheet" href="wwwroot/css/bootstrap/bootstrap.min.css" />
+    <link rel="stylesheet" href="wwwroot/css/app.css" />
+    <link rel="icon" type="image/png" href="wwwroot/favicon.png" />
 </head>
 
 <body>
     <div id="app">
-        <svg class="loading-progress">
-            <circle r="40%" cx="50%" cy="50%" />
-            <circle r="40%" cx="50%" cy="50%" />
-        </svg>
-        <div class="loading-progress-text"></div>
+        <div style="background-color: #1a1a1a; color: #d4af37; height: 100vh; display: flex; align-items: center; justify-content: center; font-family: 'Segoe UI', Arial;">
+            <h2>Loading Khaadi Simulator...</h2>
+        </div>
     </div>
 
     <div id="blazor-error-ui">
@@ -26,7 +22,7 @@
         <a href="" class="reload">Reload</a>
         <a class="dismiss">🗙</a>
     </div>
-    <script src="_framework/blazor.webassembly.js"></script>
+    
+    <script src="wwwroot/_framework/blazor.webassembly.js"></script>
 </body>
-
 </html>
